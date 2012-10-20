@@ -22,14 +22,15 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 rowToInsert.Sku = dataRow[6];
 
                 rowToInsert.ImagesPath = dataRow[7].Split(config.MultipleItemsSeparator).ToList();
-                rowToInsert.Departments = dataRow[8].Split(config.MultipleItemsSeparator).ToList();
-                rowToInsert.Tags = dataRow[9].Split(config.MultipleItemsSeparator).ToList();
+                rowToInsert.DocumentsAndFilesPath = dataRow[8].Split(config.MultipleItemsSeparator).ToList();
+                rowToInsert.Departments = dataRow[9].Split(config.MultipleItemsSeparator).ToList();
+                rowToInsert.Tags = dataRow[10].Split(config.MultipleItemsSeparator).ToList();
 
-                rowToInsert.IsActive = Convert.ToBoolean(dataRow[10]);
+                rowToInsert.IsActive = Convert.ToBoolean(dataRow[11]);
 
                 rowToInsert.CustomFieldData = new List<CustomFieldData>();
 
-                for (int i = 11; i < config.NumberOfColumns; i++)
+                for (int i = 12; i < config.NumberOfColumns; i++)
                 {
                     CustomFieldData customFieldData = new CustomFieldData { PropertyName = csvData.Header[i], PropertyValue = dataRow[i] };
                     rowToInsert.CustomFieldData.Add(customFieldData);

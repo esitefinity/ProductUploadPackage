@@ -78,13 +78,20 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                             }
                         }
                         catalogManager.SaveChanges();
+                        
                         List<ProductImage> productImages = ImagesImporter.ImportImagesAndGetProductImages(productImportModel, config);
-
-
                         product.Images.AddRange(productImages);
+
                         catalogManager.SaveChanges();
 
                         ContentLinkGenerator.GenerateContentLinksForProductImages(product);
+
+                        List<ProductFile> productFiles = DocumentsAndFilesImporter.ImportDocumentsAndGetProductDocuments(productImportModel, config);
+                        product.DocumentsAndFiles.AddRange(productFiles);
+
+                        catalogManager.SaveChanges();
+
+                        ContentLinkGenerator.GenerateContentLinksForProductDocuments(product);
 
                         DepartmentsImporter.ImportDepartments(product, productImportModel.Departments, config);
 

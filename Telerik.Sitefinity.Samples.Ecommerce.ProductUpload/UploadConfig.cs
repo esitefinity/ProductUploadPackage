@@ -8,6 +8,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload
     {
         private int numberOfColumns = 8;
         private Guid uploadToAlbumId = LibrariesModule.DefaultImagesLibraryId;
+        private Guid uploadToLibraryId = LibrariesModule.DefaultDocumentsLibraryId;
         private char multipleItemsSeparator = '|';
 
         public virtual int NumberOfColumns
@@ -31,6 +32,18 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload
             set
             {
                 uploadToAlbumId = value;
+            }
+        }
+
+        public virtual Guid UploadToLibraryId
+        {
+            get
+            {
+                return uploadToLibraryId;
+            }
+            set
+            {
+                uploadToLibraryId = value;
             }
         }
 

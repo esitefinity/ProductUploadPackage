@@ -32,5 +32,28 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             contentLinksManager.SaveChanges();
 
         }
+
+        internal static void GenerateContentLinksForProductDocuments(Product product)
+        {
+            ContentLinksManager contentLinksManager = ContentLinksManager.GetManager();
+
+            LibrariesManager librariesManager = LibrariesManager.GetManager();
+
+            IEnumerable<ContentLink> contentLinks = contentLinksManager.GetContentLinks().Where(cl => cl.ParentItemId == product.Id && cl.ComponentPropertyName == "ProductDocumentsAndFiles").ToList();
+
+            IEnumerable<Guid> persistedIds = contentLinks.Select(cl => cl.ChildItemId);
+            List<ProductFile> documentsToAdd = product.DocumentsAndFiles.Where(i => !persistedIds.Contains(i.Id)).ToList();
+            var createdContentLinks = new List<ContentLink>();
+            foreach (ProductFile documentToAdd in documentsToAdd)
+            {
+                Telerik.Sitefinity.Libraries.Model.Document temporaryDocument = librariesManager.GetDocument(documentToAdd.Id);
+
+                ContentLink contentLink = contentLinksManager.CreateContentLink("ProductDocumentsAndFiles", product, temporaryDocument);
+                createdContentLinks.Add(contentLink);
+            }
+
+            contentLinksManager.SaveChanges();
+
+        }
     }
 }

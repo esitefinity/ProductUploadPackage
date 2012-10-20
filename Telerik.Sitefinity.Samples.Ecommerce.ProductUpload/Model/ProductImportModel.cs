@@ -18,6 +18,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model
         public decimal Weight { get; set; }
         public string Sku { get; set; }
         public List<string> ImagesPath { get; set; }
+        public List<string> DocumentsAndFilesPath { get; set; }
         public List<string> Departments { get; set; }
         public List<string> Tags { get; set; }
         public bool IsActive { get; set; }
