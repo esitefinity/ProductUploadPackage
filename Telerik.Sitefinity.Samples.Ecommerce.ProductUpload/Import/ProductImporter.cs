@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Telerik.Sitefinity.Ecommerce.Catalog.Model;
 using Telerik.Sitefinity.Modules.Ecommerce.Catalog;
+using Telerik.Sitefinity.Modules.Ecommerce.Catalog.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.ErrorHandling;
 using System.Web.Script.Serialization;
@@ -31,6 +32,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             foreach (ProductImportModel productImportModel in data)
             {
 
+                bool isFailedSet = false;
                 try
                 {
                     numberOfRecordsProcessed++;
@@ -55,6 +57,12 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                         product.Price = productImportModel.Price;
                         product.Weight = Convert.ToDouble(productImportModel.Weight);
                         product.Sku = productImportModel.Sku;
+                        product.TrackInventory = productImportModel.TrackInventory;
+                        if (productImportModel.TrackInventory == TrackInventory.Track)
+                        {
+                            product.Inventory = productImportModel.InventoryAmount;
+                            product.OutOfStockOption = productImportModel.OutOfStockOption;
+                        }
                         product.IsActive = productImportModel.IsActive;
 
                         catalogManager.RecompileItemUrls<Product>(product);
@@ -78,24 +86,14 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                             }
                         }
                         catalogManager.SaveChanges();
-                        
-                        List<ProductImage> productImages = ImagesImporter.ImportImagesAndGetProductImages(productImportModel, config);
-                        product.Images.AddRange(productImages);
 
-                        catalogManager.SaveChanges();
+                        ImportImages(config, catalogManager, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
 
-                        ContentLinkGenerator.GenerateContentLinksForProductImages(product);
+                        ImportFiles(config, catalogManager, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
 
-                        List<ProductFile> productFiles = DocumentsAndFilesImporter.ImportDocumentsAndGetProductDocuments(productImportModel, config);
-                        product.DocumentsAndFiles.AddRange(productFiles);
+                        ImportDepartments(config, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
 
-                        catalogManager.SaveChanges();
-
-                        ContentLinkGenerator.GenerateContentLinksForProductDocuments(product);
-
-                        DepartmentsImporter.ImportDepartments(product, productImportModel.Departments, config);
-
-                        TagsImporter.ImportTags(product, productImportModel.Tags, config);
+                        ImportTags(config, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
 
                         numberOfSuccessfulRecords++;
                     }
@@ -107,9 +105,12 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 }
                 catch (Exception ex)
                 {
-                    numberOfFailedRecords++;
+                    if (!isFailedSet)
+                    {
+                        numberOfFailedRecords++;
 
-                    importErrors.Add(new ImportError { ErrorMessage = ex.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                        importErrors.Add(new ImportError { ErrorMessage = ex.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                    }
 
                     continue;
                 }
@@ -157,6 +158,12 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                                 productVariation.AdditionalPrice = productVariationImportModel.AdditionalPrice;
                                 productVariation.Parent = parentProduct;
                                 productVariation.Sku = productVariationImportModel.Sku;
+                                productVariation.TrackInventory = productVariationImportModel.TrackInventory;
+                                if (productVariationImportModel.TrackInventory == TrackInventory.Track || productVariationImportModel.TrackInventory == TrackInventory.TrackByVariations)
+                                {
+                                    productVariation.Inventory = productVariationImportModel.InventoryAmount;
+                                    productVariation.OutOfStockOption = productVariationImportModel.OutOfStockOption;
+                                }
                                 productVariation.IsActive = productVariationImportModel.IsActive;
 
                                 //Set the Variant property
@@ -220,10 +227,89 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             };
             return statisticsOfImport;
         }
-  
-        
 
-        
+
+
+        #region Private Methods
+        private static void ImportTags(UploadConfig config, List<ImportError> importErrors, ref int numberOfFailedRecords, ProductImportModel productImportModel, ref bool isFailedSet, Product product)
+        {
+            try
+            {
+                TagsImporter.ImportTags(product, productImportModel.Tags, config);
+            }
+            catch (Exception tagsEx)
+            {
+                if (!isFailedSet)
+                {
+                    isFailedSet = true;
+                    numberOfFailedRecords++;
+                    importErrors.Add(new ImportError { ErrorMessage = tagsEx.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                }
+            }
+        }
+
+        private static void ImportDepartments(UploadConfig config, List<ImportError> importErrors, ref int numberOfFailedRecords, ProductImportModel productImportModel, ref bool isFailedSet, Product product)
+        {
+            try
+            {
+                DepartmentsImporter.ImportDepartments(product, productImportModel.Departments, config);
+            }
+            catch (Exception departmentsEx)
+            {
+                if (!isFailedSet)
+                {
+                    isFailedSet = true;
+                    numberOfFailedRecords++;
+                    importErrors.Add(new ImportError { ErrorMessage = departmentsEx.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                }
+            }
+        }
+
+        private static void ImportFiles(UploadConfig config, CatalogManager catalogManager, List<ImportError> importErrors, ref int numberOfFailedRecords, ProductImportModel productImportModel, ref bool isFailedSet, Product product)
+        {
+            try
+            {
+                List<ProductFile> productFiles = DocumentsAndFilesImporter.ImportDocumentsAndGetProductDocuments(productImportModel, config);
+                product.DocumentsAndFiles.AddRange(productFiles);
+
+                catalogManager.SaveChanges();
+
+                ContentLinkGenerator.GenerateContentLinksForProductDocuments(product);
+            }
+            catch (Exception filesEx)
+            {
+                if (!isFailedSet)
+                {
+                    isFailedSet = true;
+                    numberOfFailedRecords++;
+                    importErrors.Add(new ImportError { ErrorMessage = filesEx.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                }
+            }
+        }
+
+        private static void ImportImages(UploadConfig config, CatalogManager catalogManager, List<ImportError> importErrors, ref int numberOfFailedRecords, ProductImportModel productImportModel, ref bool isFailedSet, Product product)
+        {
+            try
+            {
+                List<ProductImage> productImages = ImagesImporter.ImportImagesAndGetProductImages(productImportModel, config);
+                product.Images.AddRange(productImages);
+
+                catalogManager.SaveChanges();
+
+                ContentLinkGenerator.GenerateContentLinksForProductImages(product);
+            }
+            catch (Exception imageEx)
+            {
+                if (!isFailedSet)
+                {
+                    isFailedSet = true;
+                    numberOfFailedRecords++;
+                    importErrors.Add(new ImportError { ErrorMessage = imageEx.Message, ErrorRow = productImportModel.CorrespondingRowData });
+                }
+            }
+        }
+
+        #endregion
 
     }
 }
