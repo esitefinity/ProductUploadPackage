@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Telerik.Sitefinity.Modules.Ecommerce.Catalog.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
 
 namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
@@ -26,7 +27,11 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 rowToInsert.Departments = dataRow[9].Split(config.MultipleItemsSeparator).ToList();
                 rowToInsert.Tags = dataRow[10].Split(config.MultipleItemsSeparator).ToList();
 
-                rowToInsert.IsActive = Convert.ToBoolean(dataRow[11]);
+                rowToInsert.TrackInventory = GetTrackInventory(dataRow[11]);
+                rowToInsert.InventoryAmount = GetSafeInt(dataRow[12]);
+                rowToInsert.OutOfStockOption = GetOutOfStockOption(dataRow[13]);
+
+                rowToInsert.IsActive = Convert.ToBoolean(dataRow[14]);
 
                 rowToInsert.CustomFieldData = new List<CustomFieldData>();
 
@@ -43,6 +48,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             return dataToInsertInDatabase;
         }
 
+
         internal static List<ProductVariationImportModel> ConvertCsvDataToProductVariationImportModel(CsvData csvData, UploadConfig config)
         {
             List<ProductVariationImportModel> dataToInsertInDatabase = new List<ProductVariationImportModel>();
@@ -54,7 +60,10 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 rowToInsert.ValueName = dataRow[2];
                 rowToInsert.Sku = dataRow[3];
                 rowToInsert.AdditionalPrice = Convert.ToDecimal(dataRow[4]);
-                rowToInsert.IsActive = Convert.ToBoolean(dataRow[5]);
+                rowToInsert.TrackInventory = GetTrackInventory(dataRow[5]);
+                rowToInsert.InventoryAmount = GetSafeInt(dataRow[6]);
+                rowToInsert.OutOfStockOption = GetOutOfStockOption(dataRow[7]);
+                rowToInsert.IsActive = Convert.ToBoolean(dataRow[8]);
 
                 rowToInsert.CorrespondingRowData = dataRow;
 
@@ -62,7 +71,45 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             }
             return dataToInsertInDatabase;
         }
-  
 
+
+        #region Private Methods
+        private static int GetSafeInt(string stringValue)
+        {
+            if (string.IsNullOrWhiteSpace(stringValue))
+            {
+                return 0;
+            }
+            return Convert.ToInt32(stringValue);
+        }
+
+        private static TrackInventory GetTrackInventory(string trackInventoryString)
+        {
+            if (trackInventoryString == "1")
+            {
+                return TrackInventory.Track;
+            }
+            if (trackInventoryString == "2")
+            {
+                return TrackInventory.TrackByVariations;
+            }
+            return TrackInventory.DonotTrack; //return this by default
+        }
+
+
+        private static OutOfStockOption GetOutOfStockOption(string outOfStockOptionString)
+        {
+            if (outOfStockOptionString == "0")
+            {
+                return OutOfStockOption.DisplayAndAllowOrders;
+            }
+            if (outOfStockOptionString == "2")
+            {
+                return OutOfStockOption.DoNotDisplayTheProduct;
+            }
+            return OutOfStockOption.DisplayButDontAllowOrders; //return this by default
+        }
+
+        #endregion
     }
 }

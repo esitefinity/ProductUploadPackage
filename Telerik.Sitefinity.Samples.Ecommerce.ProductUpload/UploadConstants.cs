@@ -3,7 +3,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload
 {
     public class UploadConstants
     {
-        public const int DefaultNumberOfColumnsForProductImport = 14;
-        public const int DefaultNumberOfColumnsForProductVariationImport = 6;
+        public const int DefaultNumberOfColumnsForProductImport = 17;
+        public const int DefaultNumberOfColumnsForProductVariationImport = 9;
     }
 }
