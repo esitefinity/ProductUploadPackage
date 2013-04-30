@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using Telerik.Sitefinity.Data.ContentLinks;
 using Telerik.Sitefinity.Modules.Libraries;
 using Telerik.Sitefinity.Libraries.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
@@ -17,45 +18,52 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
             LibrariesManager librariesManager = LibrariesManager.GetManager();
 
-            Album albumToUploadImagesTo = librariesManager.GetAlbum(config.UploadToAlbumId); 
+            Album albumToUploadImagesTo = librariesManager.GetAlbum(config.UploadToAlbumId);
 
             foreach (var imagePath in imagesPath)
             {
-                FileInfo fileInfo = new FileInfo(imagePath);
-                if (fileInfo == null)
+                try
                 {
-                    continue;
-                }
-                
-                
-                //To create an image you have to be logged in as an admin.
-                Telerik.Sitefinity.Libraries.Model.Image image = librariesManager.CreateImage();
-                image.AlternativeText = "Some alt text";
-                
-                var extension = fileInfo.Extension;
-                var imageTitle = fileInfo.Name;
-                if (extension.Length > 0)
-                {
-                    imageTitle = imageTitle.Substring(0, imageTitle.Length - extension.Length);
-                }
-                image.Parent = albumToUploadImagesTo;
-                image.Title = imageTitle;
-                image.UrlName = imageTitle.ToLower().Replace(' ', '-');
-                librariesManager.RecompileItemUrls<Telerik.Sitefinity.Libraries.Model.Image>(image);
-                using (var fileStream = fileInfo.OpenRead())
-                {
-                    librariesManager.Upload(image, fileStream, fileInfo.Extension);
-                }
-                librariesManager.Publish(image);
+                    FileInfo fileInfo = new FileInfo(imagePath);
+                    if (fileInfo == null)
+                    {
+                        continue;
+                    }
 
-                ProductImageInfo imageInfo = new ProductImageInfo
-                {
-                    ImageInfo = fileInfo,
-                    Album = albumToUploadImagesTo,
-                    Image = image,
-                };
 
-                productImageInfos.Add(imageInfo);
+                    //To create an image you have to be logged in as an admin.
+                    Telerik.Sitefinity.Libraries.Model.Image image = librariesManager.CreateImage();
+                    image.AlternativeText = "Some alt text";
+
+                    var extension = fileInfo.Extension;
+                    var imageTitle = fileInfo.Name;
+                    if (extension.Length > 0)
+                    {
+                        imageTitle = imageTitle.Substring(0, imageTitle.Length - extension.Length);
+                    }
+                    image.Parent = albumToUploadImagesTo;
+                    image.Title = imageTitle;
+                    image.UrlName = imageTitle.ToLower().Replace(' ', '-');
+                    librariesManager.RecompileItemUrls<Telerik.Sitefinity.Libraries.Model.Image>(image);
+                    using (var fileStream = fileInfo.OpenRead())
+                    {
+                        librariesManager.Upload(image, fileStream, fileInfo.Extension);
+                    }
+                    librariesManager.Lifecycle.Publish(image);
+
+                    ProductImageInfo imageInfo = new ProductImageInfo
+                    {
+                        ImageInfo = fileInfo,
+                        Album = albumToUploadImagesTo,
+                        Image = image,
+                    };
+
+                    productImageInfos.Add(imageInfo);
+                }
+                catch
+                {
+                    //catching so even if one image fails the rest goes on
+                }
             }
 
             librariesManager.SaveChanges();
@@ -66,6 +74,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
         internal static List<ProductImage> GetProductImages(List<ProductImageInfo> importedImages)
         {
             List<ProductImage> productImages = new List<ProductImage>();
+
             foreach (var importedImage in importedImages)
             {
                 ProductImage productImage = new ProductImage();
