@@ -19,20 +19,27 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
             foreach (var departmentString in departmentList)
             {
-                Taxon department = GetDepartmentIfItExsistsOrCreateOneIfItDoesnt(departmentString, departmentTaxonomy, taxonomyManager);
-                
-                SetDepartmentProperties(department, departmentString);
-
-                taxonomyManager.SaveChanges();
-
-                if (product.Organizer.TaxonExists("Department", department.Id) == true)
+                try
                 {
-                    continue;        // Product already linked to department
+                    Taxon department = GetDepartmentIfItExsistsOrCreateOneIfItDoesnt(departmentString, departmentTaxonomy, taxonomyManager);
+
+                    SetDepartmentProperties(department, departmentString);
+
+                    taxonomyManager.SaveChanges();
+
+                    if (product.Organizer.TaxonExists("Department", department.Id) == true)
+                    {
+                        continue;        // Product already linked to department
+                    }
+
+                    product.Organizer.AddTaxa("Department", department.Id);
+
+                    catalogManager.SaveChanges();
                 }
-
-                product.Organizer.AddTaxa("Department", department.Id);
-
-                catalogManager.SaveChanges();
+                catch
+                {
+                    //catching so even if one department fails rest goes on
+                }
 
             }
         }

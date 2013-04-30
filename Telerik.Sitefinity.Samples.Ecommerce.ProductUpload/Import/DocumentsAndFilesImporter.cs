@@ -21,40 +21,47 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
             foreach (var documentPath in documentsAndFilesPath)
             {
-                FileInfo fileInfo = new FileInfo(documentPath);
-                if (fileInfo == null)
+                try
                 {
-                    continue;
-                }
-                
-                
-                //To create an image you have to be logged in as an admin.
-                Telerik.Sitefinity.Libraries.Model.Document document = librariesManager.CreateDocument();
-               
-                var extension = fileInfo.Extension;
-                var documentTitle = fileInfo.Name;
-                if (extension.Length > 0)
-                {
-                    documentTitle = documentTitle.Substring(0, documentTitle.Length - extension.Length);
-                }
-                document.Parent = libraryToUploadDocumentsTo;
-                document.Title = documentTitle;
-                document.UrlName = documentTitle.ToLower().Replace(' ', '-');
-                librariesManager.RecompileItemUrls<Telerik.Sitefinity.Libraries.Model.Document>(document);
-                using (var fileStream = fileInfo.OpenRead())
-                {
-                    librariesManager.Upload(document, fileStream, fileInfo.Extension);
-                }
-                librariesManager.Publish(document);
+                    FileInfo fileInfo = new FileInfo(documentPath);
+                    if (fileInfo == null)
+                    {
+                        continue;
+                    }
 
-                ProductDocumentFileInfo documentFileInfo = new ProductDocumentFileInfo
-                {
-                    FileInfo = fileInfo,
-                    Library = libraryToUploadDocumentsTo,
-                    Document = document,
-                };
 
-                productDocumentFileInfos.Add(documentFileInfo);
+                    //To create an image you have to be logged in as an admin.
+                    Telerik.Sitefinity.Libraries.Model.Document document = librariesManager.CreateDocument();
+
+                    var extension = fileInfo.Extension;
+                    var documentTitle = fileInfo.Name;
+                    if (extension.Length > 0)
+                    {
+                        documentTitle = documentTitle.Substring(0, documentTitle.Length - extension.Length);
+                    }
+                    document.Parent = libraryToUploadDocumentsTo;
+                    document.Title = documentTitle;
+                    document.UrlName = documentTitle.ToLower().Replace(' ', '-');
+                    librariesManager.RecompileItemUrls<Telerik.Sitefinity.Libraries.Model.Document>(document);
+                    using (var fileStream = fileInfo.OpenRead())
+                    {
+                        librariesManager.Upload(document, fileStream, fileInfo.Extension);
+                    }
+                    librariesManager.Lifecycle.Publish(document);
+
+                    ProductDocumentFileInfo documentFileInfo = new ProductDocumentFileInfo
+                    {
+                        FileInfo = fileInfo,
+                        Library = libraryToUploadDocumentsTo,
+                        Document = document,
+                    };
+
+                    productDocumentFileInfos.Add(documentFileInfo);
+                }
+                catch
+                {
+                    //catching so even if one document fails rest succeeds
+                }
             }
 
             librariesManager.SaveChanges();

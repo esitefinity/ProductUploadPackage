@@ -4,11 +4,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Telerik.Sitefinity.Ecommerce.Catalog.Model;
+using Telerik.Sitefinity.GenericContent.Model;
 using Telerik.Sitefinity.Modules.Ecommerce.Catalog;
 using Telerik.Sitefinity.Modules.Ecommerce.Catalog.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.ErrorHandling;
 using System.Web.Script.Serialization;
+using Telerik.Sitefinity.Workflow;
 
 namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 {
@@ -63,9 +65,10 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                             product.Inventory = productImportModel.InventoryAmount;
                             product.OutOfStockOption = productImportModel.OutOfStockOption;
                         }
-                        product.IsActive = productImportModel.IsActive;
+                        product.ClrType = productType.ClrType;
 
                         catalogManager.RecompileItemUrls<Product>(product);
+                        catalogManager.SaveChanges();
 
                         var props = TypeDescriptor.GetProperties(product);
                         foreach (var singleProp in props)
@@ -94,6 +97,19 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                         ImportDepartments(config, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
 
                         ImportTags(config, importErrors, ref numberOfFailedRecords, productImportModel, ref isFailedSet, product);
+
+                        var contextBag = new Dictionary<string, string>();
+                        contextBag.Add("ContentType", product.GetType().FullName);
+
+                        string workflowOperation = "Publish";
+
+                        WorkflowManager.MessageWorkflow(
+                                                        product.Id,
+                                                        product.GetType(),
+                                                        "OpenAccessDataProvider",
+                                                        workflowOperation,
+                                                        false,
+                                                        contextBag);
 
                         numberOfSuccessfulRecords++;
                     }
@@ -143,7 +159,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 {
                     numberOfRecordsProcessed++;
 
-                    Product parentProduct = catalogManager.GetProduct(productVariationImportModel.ProductNameSku);
+                    Product parentProduct = catalogManager.GetProducts().Where(p=>p.Status == ContentLifecycleStatus.Master && p.Sku == productVariationImportModel.ProductNameSku).FirstOrDefault();
+
                     if (parentProduct != null)
                     {
                         ProductAttribute productAttribute = catalogManager.GetProductAttributeByName(productVariationImportModel.AttributeName);
@@ -182,6 +199,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                                 detail.ProductAttributeValueParent = attributeValue;
                                 detail.ProductVariationParent = productVariation;
                                 detail.ProductVariationDetailParentId = Guid.Empty;
+                                detail.Parent = parentProduct;
 
                                 parentProduct.ProductVariations.Add(productVariation);
 
