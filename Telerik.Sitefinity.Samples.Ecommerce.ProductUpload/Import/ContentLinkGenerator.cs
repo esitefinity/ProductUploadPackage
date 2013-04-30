@@ -20,12 +20,17 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
             IEnumerable<Guid> persistedIds = contentLinks.Select(cl => cl.ChildItemId);
             List<ProductImage> imagesToAdd = product.Images.Where(i => !persistedIds.Contains(i.Id)).ToList();
+            
             var createdContentLinks = new List<ContentLink>();
+            int ordinal = 0;
+
             foreach (ProductImage productImageToAdd in imagesToAdd)
             {
                 Telerik.Sitefinity.Libraries.Model.Image temporaryImage = librariesManager.GetImage(productImageToAdd.Id);
 
                 ContentLink contentLink = contentLinksManager.CreateContentLink("ProductImage", product, temporaryImage);
+                contentLink.Ordinal = ordinal;
+                ordinal++;
                 createdContentLinks.Add(contentLink);
             }
 
@@ -44,11 +49,16 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             IEnumerable<Guid> persistedIds = contentLinks.Select(cl => cl.ChildItemId);
             List<ProductFile> documentsToAdd = product.DocumentsAndFiles.Where(i => !persistedIds.Contains(i.Id)).ToList();
             var createdContentLinks = new List<ContentLink>();
+            int ordinal = 0;
+
             foreach (ProductFile documentToAdd in documentsToAdd)
             {
                 Telerik.Sitefinity.Libraries.Model.Document temporaryDocument = librariesManager.GetDocument(documentToAdd.Id);
 
                 ContentLink contentLink = contentLinksManager.CreateContentLink("ProductDocumentsAndFiles", product, temporaryDocument);
+                contentLink.Ordinal = ordinal;
+                ordinal++;
+
                 createdContentLinks.Add(contentLink);
             }
 

@@ -20,21 +20,27 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
             foreach (var tagString in tagsList)
             {
-                Taxon tag = GetTagIfItExsistsOrCreateOneIfItDoesnt(tagString, tagsTaxonomy, taxonomyManager);
-
-                SetTagProperties(tag, tagString);
-
-                taxonomyManager.SaveChanges();
-
-                if (product.Organizer.TaxonExists("Tags", tag.Id) == true)
+                try
                 {
-                    continue;        // Product already linked to Tag
+                    Taxon tag = GetTagIfItExsistsOrCreateOneIfItDoesnt(tagString, tagsTaxonomy, taxonomyManager);
+
+                    SetTagProperties(tag, tagString);
+
+                    taxonomyManager.SaveChanges();
+
+                    if (product.Organizer.TaxonExists("Tags", tag.Id) == true)
+                    {
+                        continue;        // Product already linked to Tag
+                    }
+
+                    product.Organizer.AddTaxa("Tags", tag.Id);
+
+                    catalogManager.SaveChanges();
                 }
-
-                product.Organizer.AddTaxa("Tags", tag.Id);
-
-                catalogManager.SaveChanges();
-
+                catch
+                {
+                    //catching so even if one fails rest goes on
+                }
             }
         }
 
