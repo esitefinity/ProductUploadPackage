@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Telerik.Sitefinity.Ecommerce.Catalog.Model;
+using Telerik.Sitefinity.GenericContent.Model;
 using Telerik.Sitefinity.Modules.Ecommerce.Catalog;
 using Telerik.Sitefinity.Modules.Ecommerce.Catalog.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
@@ -158,7 +159,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 {
                     numberOfRecordsProcessed++;
 
-                    Product parentProduct = catalogManager.GetProduct(productVariationImportModel.ProductNameSku);
+                    Product parentProduct = catalogManager.GetProducts().Where(p=>p.Status == ContentLifecycleStatus.Master && p.Sku == productVariationImportModel.ProductNameSku).FirstOrDefault();
+
                     if (parentProduct != null)
                     {
                         ProductAttribute productAttribute = catalogManager.GetProductAttributeByName(productVariationImportModel.AttributeName);
@@ -197,6 +199,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                                 detail.ProductAttributeValueParent = attributeValue;
                                 detail.ProductVariationParent = productVariation;
                                 detail.ProductVariationDetailParentId = Guid.Empty;
+                                detail.Parent = parentProduct;
 
                                 parentProduct.ProductVariations.Add(productVariation);
 
