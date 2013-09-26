@@ -35,7 +35,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
                 rowToInsert.CustomFieldData = new List<CustomFieldData>();
 
-                for (int i = 12; i < config.NumberOfColumns; i++)
+                for (int i = 15; i < config.NumberOfColumns; i++)
                 {
                     CustomFieldData customFieldData = new CustomFieldData { PropertyName = csvData.Header[i], PropertyValue = dataRow[i] };
                     rowToInsert.CustomFieldData.Add(customFieldData);
