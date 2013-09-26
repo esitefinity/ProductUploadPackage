@@ -11,6 +11,7 @@ using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.ErrorHandling;
 using System.Web.Script.Serialization;
 using Telerik.Sitefinity.Workflow;
+using Telerik.Sitefinity.Modules.Ecommerce.Catalog.Web.Services;
 
 namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 {
@@ -106,7 +107,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                         WorkflowManager.MessageWorkflow(
                                                         product.Id,
                                                         product.GetType(),
-                                                        "OpenAccessDataProvider",
+                                                        DefaultProvider,
                                                         workflowOperation,
                                                         false,
                                                         contextBag);
@@ -159,7 +160,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                 {
                     numberOfRecordsProcessed++;
 
-                    Product parentProduct = catalogManager.GetProducts().Where(p=>p.Status == ContentLifecycleStatus.Master && p.Sku == productVariationImportModel.ProductNameSku).FirstOrDefault();
+                    Product parentProduct = catalogManager.GetProducts().Where(p => p.Status == ContentLifecycleStatus.Master && p.Sku == productVariationImportModel.ProductNameSku).FirstOrDefault();
 
                     if (parentProduct != null)
                     {
@@ -184,14 +185,16 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                                 productVariation.IsActive = productVariationImportModel.IsActive;
 
                                 //Set the Variant property
+                                List<AttributeValuePair> attributeValuePairs = new List<AttributeValuePair>();
                                 AttributeValuePair attributeValuePair = new AttributeValuePair();
                                 attributeValuePair.AttributeValueId = attributeValue.Id;
                                 attributeValuePair.AttributeId = attributeValue.Parent.Id;
+                                attributeValuePairs.Add(attributeValuePair);
 
                                 JavaScriptSerializer serializer = new JavaScriptSerializer();
-                                string attributeValuePairJson = serializer.Serialize(attributeValuePair);
+                                string attributeValuePairsJson = serializer.Serialize(attributeValuePairs);
 
-                                productVariation.Variant = attributeValuePairJson;
+                                productVariation.Variant = attributeValuePairsJson;
 
                                 //Create the product variation detail
                                 ProductVariationDetail detail = catalogManager.CreateProductVariationDetail();
@@ -217,8 +220,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                         {
                             throw new ArgumentException("Cannot find attribute with title  " + productVariationImportModel.AttributeName);
                         }
-                        
-                        
+
+
                     }
                     else
                     {
@@ -292,7 +295,7 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
                 catalogManager.SaveChanges();
 
-                ContentLinkGenerator.GenerateContentLinksForProductDocuments(product);
+                ProductSynchronizer.UpdateProductDocumentsAndFilesLinks(product, DefaultProvider);
             }
             catch (Exception filesEx)
             {
@@ -329,5 +332,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 
         #endregion
 
+        #region Public fields
+        const string DefaultProvider = "OpenAccessDataProvider";
+        #endregion
     }
 }
