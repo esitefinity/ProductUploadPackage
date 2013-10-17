@@ -6,6 +6,7 @@ using Telerik.Sitefinity.Modules.Libraries;
 using Telerik.Sitefinity.Libraries.Model;
 using Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Model;
 using Telerik.Sitefinity.Ecommerce.Catalog.Model;
+using Telerik.Sitefinity.GenericContent.Model;
 
 namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
 {
@@ -29,9 +30,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                         continue;
                     }
 
-
                     //To create an image you have to be logged in as an admin.
-                    Telerik.Sitefinity.Libraries.Model.Document document = librariesManager.CreateDocument();
+                    Document document = librariesManager.CreateDocument();
 
                     var extension = fileInfo.Extension;
                     var documentTitle = fileInfo.Name;
@@ -42,18 +42,20 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
                     document.Parent = libraryToUploadDocumentsTo;
                     document.Title = documentTitle;
                     document.UrlName = documentTitle.ToLower().Replace(' ', '-');
-                    librariesManager.RecompileItemUrls<Telerik.Sitefinity.Libraries.Model.Document>(document);
+                    librariesManager.RecompileItemUrls<Document>(document);
                     using (var fileStream = fileInfo.OpenRead())
                     {
                         librariesManager.Upload(document, fileStream, fileInfo.Extension);
                     }
-                    librariesManager.Lifecycle.Publish(document);
+                    librariesManager.SaveChanges();
+
+                    Document liveDocument = librariesManager.Lifecycle.Publish(document) as Document;                    
 
                     ProductDocumentFileInfo documentFileInfo = new ProductDocumentFileInfo
                     {
                         FileInfo = fileInfo,
                         Library = libraryToUploadDocumentsTo,
-                        Document = document,
+                        Document = liveDocument,
                     };
 
                     productDocumentFileInfos.Add(documentFileInfo);
