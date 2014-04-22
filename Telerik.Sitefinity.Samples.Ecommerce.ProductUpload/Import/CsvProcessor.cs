@@ -23,8 +23,8 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload.Import
             {
                 header = csvReader.FieldHeaders;
 
-                row = new string[config.NumberOfColumns];
-                for (int j = 0; j < config.NumberOfColumns; j++)
+                row = new string[header.Length];
+                for (int j = 0; j < header.Length; j++)
                 {
                     row[j] = csvReader.GetField(j);
                 }

@@ -6,22 +6,9 @@ namespace Telerik.Sitefinity.Samples.Ecommerce.ProductUpload
 {
     public class UploadConfig
     {
-        private int numberOfColumns = 8;
         private Guid uploadToAlbumId = LibrariesModule.DefaultImagesLibraryId;
         private Guid uploadToLibraryId = LibrariesModule.DefaultDocumentsLibraryId;
         private char multipleItemsSeparator = '|';
-
-        public virtual int NumberOfColumns
-        {
-            get
-            {
-                return numberOfColumns;
-            }
-            set
-            {
-                numberOfColumns = value;
-            }
-        }
 
         public virtual Guid UploadToAlbumId
         {

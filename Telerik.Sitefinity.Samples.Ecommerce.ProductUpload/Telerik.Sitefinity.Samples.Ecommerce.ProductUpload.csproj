@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CsvHelper">
-      <HintPath>..\..\..\..\Temp\60\Projects\ProductUpload60\packages\CsvHelper.1.17.0\lib\net40-client\CsvHelper.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\CMS\Sitefinity 4.0\Code Base\SitefinityWebApp\bin\CsvHelper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,21 +46,19 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Telerik.OpenAccess, Version=2012.3.1012.1, Culture=neutral, PublicKeyToken=7ce17eeaf1d59342, processorArchitecture=MSIL">
+    <Reference Include="Telerik.OpenAccess, Version=2012.2.816.1, Culture=neutral, PublicKeyToken=7ce17eeaf1d59342, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Reference Assemblies\Telerik.OpenAccess.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\CMS\Sitefinity 4.0\OfficialBranches\eCommerce\SitefinityWebApp\bin\Telerik.OpenAccess.dll</HintPath>
     </Reference>
-    <Reference Include="Telerik.Sitefinity, Version=5.2.3700.0, Culture=neutral, PublicKeyToken=b28c218413bdf563, processorArchitecture=MSIL">
+    <Reference Include="Telerik.Sitefinity, Version=6.0.4100.0, Culture=neutral, PublicKeyToken=b28c218413bdf563, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Reference Assemblies\Telerik.Sitefinity.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\CMS\Sitefinity 4.0\OfficialBranches\eCommerce\SitefinityWebApp\bin\Telerik.Sitefinity.dll</HintPath>
     </Reference>
-    <Reference Include="Telerik.Sitefinity.Ecommerce, Version=5.2.3700.0, Culture=neutral, PublicKeyToken=b28c218413bdf563, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Reference Assemblies\Telerik.Sitefinity.Ecommerce.dll</HintPath>
+    <Reference Include="Telerik.Sitefinity.Ecommerce">
+      <HintPath>..\..\..\..\..\..\CMS\Sitefinity 4.0\OfficialBranches\eCommerce\SitefinityWebApp\bin\Telerik.Sitefinity.Ecommerce.dll</HintPath>
     </Reference>
-    <Reference Include="Telerik.Sitefinity.Model, Version=5.2.3700.0, Culture=neutral, PublicKeyToken=b28c218413bdf563, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Reference Assemblies\Telerik.Sitefinity.Model.dll</HintPath>
+    <Reference Include="Telerik.Sitefinity.Model">
+      <HintPath>..\..\..\..\..\..\CMS\Sitefinity 4.0\OfficialBranches\eCommerce\SitefinityWebApp\bin\Telerik.Sitefinity.Model.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -81,7 +79,6 @@
     <Compile Include="Model\ProductImageInfo.cs" />
     <Compile Include="Model\ProductVariationImportModel.cs" />
     <Compile Include="UploadConfig.cs" />
-    <Compile Include="UploadConstants.cs" />
     <Compile Include="Util\IoHelper.cs" />
     <Compile Include="Model\ProductImportModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
